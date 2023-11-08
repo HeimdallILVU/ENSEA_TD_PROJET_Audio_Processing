@@ -1,2 +1,4 @@
-package audio;public class AudioProcessor {
+package audio;
+
+public class AudioProcessor {
 }

@@ -9,7 +9,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 
-public class Interface extends Application {
+public class Main extends Application {
     @Override
     public void start(Stage primaryStage) {
         try {
