@@ -1,53 +1,59 @@
 package audio;
 
-
 import javax.sound.sampled.*;
 
 public class Main {
-    public static void main(String[] args) throws LineUnavailableException {
-        // Audio format with 8000Hz sample rate
-        AudioFormat audioFormat = new AudioFormat(8000.0f, 8, 1, true, true);
+    /**
+     * This main function is used to test the functionnality of AudioSignal
+     * @param none
+     */
+    public static void main(String[] args) {
+        // Audio format with 8000Hz sample rate and 16 Bits format
+        AudioFormat audioFormat = new AudioFormat(8000.0f, 16, 1, true, true);
 
-        SourceDataLine sourceDataLine = AudioSystem.getSourceDataLine(audioFormat);
+        // Creating two AudioSignal Instances
+        AudioSignal audioSignal = new AudioSignal(32000, audioFormat);
+        AudioSignal audioSignal2 = new AudioSignal(audioSignal);
 
-        // Get the Line.Info for the SourceDataLine
-        Line.Info lineInfo = sourceDataLine.getLineInfo();
+        // Defining Input and Output for the Audio
+        SourceDataLine sourceDataLine = null;
+        TargetDataLine targetDataLine = null;
 
-        /*
-        if (lineInfo instanceof DataLine.Info) {
-            DataLine.Info dataLineInfo = (DataLine.Info) lineInfo;
-            System.out.println("Line Info: " + dataLineInfo.toString());
-            System.out.println("Supported SourceDataLine formats:");
-            AudioFormat[] formats = dataLineInfo.getFormats();
-            for (AudioFormat format : formats) {
-                System.out.println(format.toString());
-            }
-        } else {
-            System.out.println("Not a DataLine.Info");
-        }*/
-
-
-        sourceDataLine.open(audioFormat);
-        sourceDataLine.start();
-
-        // Create a buffer for the audio data
-        int bufferSize = 8000; // 1 second of audio
-        byte[] buffer = new byte[bufferSize];
-
-        // Generate a simple 8000Hz sine wave
-        for (int i = 0; i < bufferSize; i++) {
-            double angle = 2.0 * Math.PI * i / 8000.0;
-            byte sample = (byte) (Math.sin(angle) * 127.0);
-            buffer[i] = sample;
+        // Try and catch of the getDataLines
+        try {
+            sourceDataLine = AudioSystem.getSourceDataLine(audioFormat);
+            targetDataLine = AudioSystem.getTargetDataLine(audioFormat);
+        } catch (LineUnavailableException e) {
+            throw new RuntimeException(e);
         }
 
-        // Write the audio data to the SourceDataLine
-        sourceDataLine.write(buffer, 0, bufferSize);
+        // open and start targetDataLine
+        try {
+            targetDataLine.open(audioFormat);
+            targetDataLine.start();
+        } catch (LineUnavailableException e) {
+            throw new RuntimeException(e);
+        }
+        
 
-        // Block until all data is played
-        sourceDataLine.drain();
+        // Recording 4 seconds of audio
+        System.out.println("Start of Recording !");
+        audioSignal.recordFrom(targetDataLine); System.out.println("End of Recording !");
 
-        // Close the SourceDataLine
-        sourceDataLine.close();
+        // Playing to audioSignal.sourceDataLine
+        System.out.println("Start of Playing to audioSignal.sourceDataLine !");
+        audioSignal.play(); System.out.println("End of Playing to audioSignal.sourceDataLine !");
+
+        // Playing to external sourceDataLine
+        System.out.println("Start of Playing to external sourceDataLine !");
+        audioSignal.playTo(sourceDataLine); System.out.println("End of Playing to external sourceDataLine !");
+
+        // Copying of signal
+        audioSignal2.setFrom(audioSignal);
+
+        // Playing to external sourceDataLine to test correct copy of audioSignal
+        System.out.println("Start of Playing to external sourceDataLine of audioSignal2 !");
+        audioSignal2.playTo(sourceDataLine); System.out.println("End of Playing to external sourceDataLine of audioSignal2 !");
+
     }
 }
