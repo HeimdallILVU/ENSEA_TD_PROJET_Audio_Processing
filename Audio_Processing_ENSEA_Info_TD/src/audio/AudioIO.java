@@ -1,9 +1,6 @@
 package audio;
 
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.Mixer;
-import javax.sound.sampled.SourceDataLine;
-import javax.sound.sampled.TargetDataLine;
+import javax.sound.sampled.*;
 import java.util.Arrays;
 
 public class AudioIO {
@@ -35,19 +32,57 @@ public class AudioIO {
      * @see .AudioSystem.getMixerInfo() which provides a list of all mixers on your system.
      */
     public static TargetDataLine obtainAudioInput(String mixerName, int sampleRate) {
+        // Create the Object that will be returned, return null if failed.
+        TargetDataLine targetDataLine;
 
-        return null;
+        // Audio format with sampleRate as sample rate and 16 Bits format
+        AudioFormat audioFormat = new AudioFormat((float) sampleRate, 16, 1, true, true);
+
+        Mixer.Info mixerInfo = getMixerInfo(mixerName);
+
+        try {
+            targetDataLine = AudioSystem.getTargetDataLine(audioFormat, mixerInfo);
+        } catch (LineUnavailableException e) {
+            throw new RuntimeException(e);
+        }
+
+        return targetDataLine;
     }
 
     /**
      * Return a line that's appropriate for playing sound to a loudspeaker.
      */
     public static SourceDataLine obtainAudioOutput(String mixerName, int sampleRate) {
+        // Create the Object that will be returned, return null if failed.
+        SourceDataLine sourceDataLine;
 
-        return null;
+        // Audio format with sampleRate as sample rate and 16 Bits format
+        AudioFormat audioFormat = new AudioFormat((float) sampleRate, 16, 1, true, true);
+
+        Mixer.Info mixerInfo = getMixerInfo(mixerName);
+
+        try {
+            sourceDataLine = AudioSystem.getSourceDataLine(audioFormat, mixerInfo);
+        } catch (LineUnavailableException e) {
+            throw new RuntimeException(e);
+        }
+
+        return sourceDataLine;
     }
 
     public static void main(String[] args) {
 
+        int samplingRate = 8000;
+
+        // List of Audio Mixers
+        printAudioMixers();
+
+        // Trying to get my Microphone
+        System.out.println(getMixerInfo("Headset Microphone (Realtek(R) "));
+        System.out.println(obtainAudioInput("Headset Microphone (Realtek(R) ", samplingRate));
+
+        // Trying to get my Headset speaker
+        System.out.println(getMixerInfo("Headphone (Realtek(R) Audio)"));
+        System.out.println(obtainAudioOutput("Headphone (Realtek(R) Audio)", samplingRate));
     }
 }
