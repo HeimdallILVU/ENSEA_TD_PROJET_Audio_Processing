@@ -1,9 +1,6 @@
 package audio;
 
-import javax.sound.sampled.AudioFormat;
-import javax.sound.sampled.LineUnavailableException;
-import javax.sound.sampled.SourceDataLine;
-import javax.sound.sampled.TargetDataLine;
+import javax.sound.sampled.*;
 
 /** The main audio processing class, implemented as a Runnable so
     * as to be run in a separated execution Thread. */
@@ -41,7 +38,9 @@ public class AudioProcessor implements Runnable {
             inputSignal.recordFrom(audioInput);
             // your job: copy inputSignal to outputSignal with some audio effect
 
-            outputSignal.playTo(audioOutput);
+            outputSignal.setFrom(inputSignal); // No effect applied
+
+            outputSignal.playTo(audioOutput, true);
         }
     }
 
@@ -57,14 +56,16 @@ public class AudioProcessor implements Runnable {
 
     /* an example of a possible test code */
     public static void main(String[] args) {
-        TargetDataLine inLine = AudioIO.obtainAudioInput("Default Audio Device", 16000);
-        SourceDataLine outLine = AudioIO.obtainAudioOutput("Default Audio Device", 16000);
-        AudioProcessor as = new AudioProcessor(inLine, outLine, 1024);
+        AudioIO.printAudioMixers();
+        AudioFormat audioFormat = new AudioFormat(16000.0f, 16, 1, true, true);
+        TargetDataLine inLine = AudioIO.obtainAudioInput("Headset Microphone (Realtek(R) ", 16000);
+        SourceDataLine outLine = AudioIO.obtainAudioOutput("Headphone (Realtek(R) Audio)", 16000);
+        AudioProcessor as = new AudioProcessor(inLine, outLine, 32);
 
         try {
-            inLine.open();
+            inLine.open(audioFormat);
             inLine.start();
-            outLine.open();
+            outLine.open(audioFormat);
             outLine.start();
         } catch (LineUnavailableException e) {
             throw new RuntimeException(e);

@@ -99,6 +99,26 @@ public class AudioSignal {
         return true;
     }
 
+    /** Plays the buffer content to the given output.
+     * @param continuous if set to True, will not close the audioOutput DataLine
+     * @return false if at end of stream */
+    public boolean playTo(SourceDataLine audioOutput, boolean continuous) {
+
+        // Start the sourceDataLine
+        if(!continuous) audioOutput.start();
+
+        // Write the audio data to the SourceDataLine
+        audioOutput.write(convertDoublesToBytes(this.sampleBuffer, audioOutput.getFormat().getSampleSizeInBits()), 0, this.sampleBuffer.length * 2);
+
+        // Block until all data is played
+        if(!continuous) audioOutput.drain();
+
+        // Close the SourceDataLine
+        if(!continuous) audioOutput.close();
+
+        return true;
+    }
+
     // TODO Can be implemented much later: Complex[] computeFFT()
 
 
@@ -147,8 +167,30 @@ public class AudioSignal {
         } else {
             throw new RuntimeException("Change Audio format to 16 Bits");
         }
+    }
+
+    public void playTestSin(SourceDataLine sourceDataLine, boolean continuous) {
+        if(sourceDataLine.getFormat().getSampleSizeInBits() == 16) {
+            // Create a buffer for the audio data
+            int bufferSize = this.getFrameSize();
+            double[] buffer = new double[bufferSize];
 
 
+            // Generate a simple 1000Hz sine wave
+            for (int i = 0; i < bufferSize/2; i++) {
+                double angle = 2.0 * Math.PI * 1000 * i / sourceDataLine.getFormat().getSampleRate();
+                double sampleValue = Math.sin(angle);
+
+                buffer[i] = sampleValue;
+            }
+
+            this.sampleBuffer = buffer;
+
+            this.playTo(sourceDataLine, continuous);
+
+        } else {
+            throw new RuntimeException("Change Audio format to 16 Bits");
+        }
     }
 
     /**
@@ -174,6 +216,11 @@ public class AudioSignal {
         } catch (LineUnavailableException e) {
             throw new RuntimeException(e);
         }
+
+        //Checking the gotten lines
+
+        System.out.println(sourceDataLine.getLineInfo());
+        System.out.println(targetDataLine.getLineInfo());
 
         // open and start targetDataLine
         try {
