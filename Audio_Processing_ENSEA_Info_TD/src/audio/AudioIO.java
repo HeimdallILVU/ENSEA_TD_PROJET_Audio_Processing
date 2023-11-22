@@ -3,6 +3,7 @@ package audio;
 import javax.sound.sampled.*;
 import java.util.Arrays;
 
+/** A collection of static utilities related to the audio system. */
 public class AudioIO {
     /**
      * Displays every audio mixer available on the current system.
