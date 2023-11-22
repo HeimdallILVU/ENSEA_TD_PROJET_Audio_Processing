@@ -138,6 +138,10 @@ public class AudioSignal {
         return sampleBuffer.length;
     }
 
+    public void setFrameSize(int FrameSize) {
+        this.sampleBuffer = new double[FrameSize];
+    }
+
     public double[] getSampleBuffer() {
         return sampleBuffer;
     }

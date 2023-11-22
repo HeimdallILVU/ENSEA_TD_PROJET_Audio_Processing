@@ -49,10 +49,49 @@ public class AudioProcessor implements Runnable {
      */
     public void terminateAudioThread() {
         this.isThreadRunning = false;
+        this.audioOutput.close();
+        this.audioInput.close();
     }
 
     // todo here: all getters and setters
 
+
+    public AudioSignal getInputSignal() {
+        return inputSignal;
+    }
+
+    public void setInputSignal(AudioSignal inputSignal) {
+        this.inputSignal = inputSignal;
+    }
+
+    public void setFrameSize(int FrameSize) {
+        this.inputSignal.setFrameSize(FrameSize);
+        this.outputSignal.setFrameSize(FrameSize);
+    }
+
+    public AudioSignal getOutputSignal() {
+        return outputSignal;
+    }
+
+    public void setOutputSignal(AudioSignal outputSignal) {
+        this.outputSignal = outputSignal;
+    }
+
+    public TargetDataLine getAudioInput() {
+        return audioInput;
+    }
+
+    public void setAudioInput(TargetDataLine audioInput) {
+        this.audioInput = audioInput;
+    }
+
+    public SourceDataLine getAudioOutput() {
+        return audioOutput;
+    }
+
+    public void setAudioOutput(SourceDataLine audioOutput) {
+        this.audioOutput = audioOutput;
+    }
 
     /* an example of a possible test code */
     public static void main(String[] args) {
@@ -60,7 +99,7 @@ public class AudioProcessor implements Runnable {
         AudioFormat audioFormat = new AudioFormat(16000.0f, 16, 1, true, true);
         TargetDataLine inLine = AudioIO.obtainAudioInput("Headset Microphone (Realtek(R) ", 16000);
         SourceDataLine outLine = AudioIO.obtainAudioOutput("Headphone (Realtek(R) Audio)", 16000);
-        AudioProcessor as = new AudioProcessor(inLine, outLine, 32);
+        AudioProcessor as = new AudioProcessor(inLine, outLine, 1024);
 
         try {
             inLine.open(audioFormat);

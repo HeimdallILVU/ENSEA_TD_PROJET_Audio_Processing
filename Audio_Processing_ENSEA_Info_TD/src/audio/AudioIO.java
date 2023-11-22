@@ -1,6 +1,7 @@
 package audio;
 
 import javax.sound.sampled.*;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 /** A collection of static utilities related to the audio system. */
@@ -12,6 +13,16 @@ public class AudioIO {
         System.out.println("Mixers:");
         Arrays.stream(AudioSystem.getMixerInfo())
                 .forEach(e -> System.out.println("- name=\"" + e.getName() + "\" description=\"" + e.getDescription() + " by " + e.getVendor() + "\""));
+    }
+
+    /**
+     * Returns every audio mixer available on the current system.
+     */
+    public static ArrayList<Mixer.Info> getAudioMixers() {
+        ArrayList<Mixer.Info> outputArraysOfMixersString = new ArrayList<Mixer.Info>();
+        Arrays.stream(AudioSystem.getMixerInfo())
+                .forEach(e -> outputArraysOfMixersString.add(e));
+        return outputArraysOfMixersString;
     }
 
     /**
