@@ -7,6 +7,7 @@ import javafx.application.Application;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.chart.LineChart;
 import javafx.scene.control.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -28,14 +29,32 @@ public class Main extends Application {
     private ToolBar toolBar;
     private Node statusBar;
     private Node mainContent;
+    private BorderPane root;
     @Override
     public void start(Stage primaryStage) {
+
         try {
-            BorderPane root = new BorderPane();
+            root = new BorderPane();
 
             toolBar = createToolbar();
             root.setTop(toolBar);
 
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+
+        // TODO - Change HardCoded Format to Interface-defined
+        this.audioFormat = new AudioFormat(16000.0f, 16, 1, true, true);
+        // TODO - Create the audioProcessor
+
+        TargetDataLine audioInput = TargetDataLineFromToolBar(this.toolBar);
+        SourceDataLine audioOutput = SourceDataLineFromToolBar(this.toolBar);
+        int FrameSize = FrameSizeFromToolBar(this.toolBar);
+
+        this.audioProcessor = new AudioProcessor(audioInput, audioOutput, FrameSize);
+
+
+        try {
             statusBar = createStatusbar();
             root.setBottom(statusBar);
 
@@ -52,69 +71,10 @@ public class Main extends Application {
             e.printStackTrace();
         }
 
-        // TODO - Change HardCoded Format to Interface-defined
-        this.audioFormat = new AudioFormat(16000.0f, 16, 1, true, true);
-        // TODO - Create the audioProcessor
 
-        TargetDataLine audioInput = TargetDataLineFromToolBar(this.toolBar);
-        SourceDataLine audioOutput = SourceDataLineFromToolBar(this.toolBar);
-        int FrameSize = FrameSizeFromToolBar(this.toolBar);
 
-        this.audioProcessor = new AudioProcessor(audioInput, audioOutput, FrameSize);
-    }
 
-    private TargetDataLine TargetDataLineFromToolBar(ToolBar toolBar) {
-        ComboBox comboBox = getComboBoxFromToolBar(toolBar, "Input Device : ");
-        TargetDataLine targetDataLine;
-        try {
-            targetDataLine = AudioSystem.getTargetDataLine(this.audioFormat, AudioIO.getMixerInfo((String) comboBox.getValue()));
-        } catch (LineUnavailableException e) {
-            targetDataLine = null;
-            System.out.println("TargetDataLine Unavailable !");
-        }
-        return targetDataLine;
-    }
-    private SourceDataLine SourceDataLineFromToolBar(ToolBar toolBar) {
-        ComboBox comboBox = getComboBoxFromToolBar(toolBar, "Output Device : ");
-        SourceDataLine sourceDataLine;
-        try {
-            sourceDataLine = AudioSystem.getSourceDataLine(this.audioFormat, AudioIO.getMixerInfo((String) comboBox.getValue()));
-        } catch (LineUnavailableException e) {
-            sourceDataLine = null;
-            System.out.println("SourceDataLine Unavailable !");
-        }
-        return sourceDataLine;
-    }
-    private int FrameSizeFromToolBar(ToolBar toolBar) {
-        return Integer.valueOf(getTextFieldFromToolBar(toolBar, "FrameSize : ").getText());
-    }
 
-    private ComboBox getComboBoxFromToolBar(ToolBar toolBar, String labelText) {
-        boolean comboBoxFound = false;
-        for (Node item : toolBar.getItems()) {
-            if (comboBoxFound && item instanceof ComboBox) {
-                return (ComboBox) item;
-            }
-
-            if (item instanceof Label && ((Label) item).getText() == labelText) {
-                comboBoxFound = true;
-            }
-        }
-        return null;
-    }
-
-    private TextField getTextFieldFromToolBar(ToolBar toolBar, String labelText) {
-        boolean textFieldFound = false;
-        for (Node item : toolBar.getItems()) {
-            if (textFieldFound && item instanceof TextField) {
-                return (TextField) item;
-            }
-
-            if (item instanceof Label && ((Label) item).getText() == labelText) {
-                textFieldFound = true;
-            }
-        }
-        return null;
     }
 
     private void updateProcessor() {
@@ -187,9 +147,101 @@ public class Main extends Application {
     }
 
     private Node createMainContent(){
-        Group g = new Group();
-        // ici en utilisant g.getChildren().add(...) vous pouvez ajouter tout ´el´ement graphique souhait´e de type Node
+        SignalView inputSignalView = new SignalView(audioProcessor.getInputSignal(), "Input Signal");
+        SignalView outputSignalView = new SignalView(audioProcessor.getOutputSignal(), "Output Signal");
+
+        HBox hbox = new HBox(inputSignalView, outputSignalView);
+
+        Group g = new Group(hbox);
         return g;
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    private TargetDataLine TargetDataLineFromToolBar(ToolBar toolBar) {
+        ComboBox comboBox = getComboBoxFromToolBar(toolBar, "Input Device : ");
+        TargetDataLine targetDataLine;
+        try {
+            targetDataLine = AudioSystem.getTargetDataLine(this.audioFormat, AudioIO.getMixerInfo((String) comboBox.getValue()));
+        } catch (LineUnavailableException e) {
+            targetDataLine = null;
+            System.out.println("TargetDataLine Unavailable !");
+        }
+        return targetDataLine;
+    }
+    private SourceDataLine SourceDataLineFromToolBar(ToolBar toolBar) {
+        ComboBox comboBox = getComboBoxFromToolBar(toolBar, "Output Device : ");
+        SourceDataLine sourceDataLine;
+        try {
+            sourceDataLine = AudioSystem.getSourceDataLine(this.audioFormat, AudioIO.getMixerInfo((String) comboBox.getValue()));
+        } catch (LineUnavailableException e) {
+            sourceDataLine = null;
+            System.out.println("SourceDataLine Unavailable !");
+        }
+        return sourceDataLine;
+    }
+    private int FrameSizeFromToolBar(ToolBar toolBar) {
+        return Integer.valueOf(getTextFieldFromToolBar(toolBar, "FrameSize : ").getText());
+    }
+
+    private ComboBox getComboBoxFromToolBar(ToolBar toolBar, String labelText) {
+        boolean comboBoxFound = false;
+        for (Node item : toolBar.getItems()) {
+            if (comboBoxFound && item instanceof ComboBox) {
+                return (ComboBox) item;
+            }
+
+            if (item instanceof Label && ((Label) item).getText() == labelText) {
+                comboBoxFound = true;
+            }
+        }
+        return null;
+    }
+
+    private TextField getTextFieldFromToolBar(ToolBar toolBar, String labelText) {
+        boolean textFieldFound = false;
+        for (Node item : toolBar.getItems()) {
+            if (textFieldFound && item instanceof TextField) {
+                return (TextField) item;
+            }
+
+            if (item instanceof Label && ((Label) item).getText() == labelText) {
+                textFieldFound = true;
+            }
+        }
+        return null;
+    }
+
 
 }
