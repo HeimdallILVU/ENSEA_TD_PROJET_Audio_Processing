@@ -1,5 +1,8 @@
 package audio;
 
+import math.Complex;
+import math.FFT;
+
 import javax.sound.sampled.*;
 
 public class AudioSignal {
@@ -256,4 +259,20 @@ public class AudioSignal {
 
     }
 
+    public Complex[] computeFFT() {
+        // Ensure that the sampleBuffer has a length that is a power of 2 for the FFT algorithm
+        int fftSize = 1;
+        while (fftSize < sampleBuffer.length) {
+            fftSize *= 2;
+        }
+
+        // Create a new buffer with the correct size for the FFT
+        double[] fftBuffer = new double[fftSize];
+        System.arraycopy(sampleBuffer, 0, fftBuffer, 0, Math.min(sampleBuffer.length, fftSize));
+
+        // Perform FFT on the buffer
+        Complex[] fftResult = FFT.fft(Complex.fromArray(fftBuffer));
+
+        return fftResult;
+    }
 }

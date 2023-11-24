@@ -61,7 +61,6 @@ public class SignalView extends LineChart<Number, Number>{
         // Add data points to the series
         {
             double[] sampleBuffer = audioSignal.getSampleBuffer();
-            System.out.println(sampleBuffer[0]);
             for (int i = 0; i < sampleBuffer.length; i++) {
                 series.getData().add(new XYChart.Data<>(i, sampleBuffer[i]));
             }

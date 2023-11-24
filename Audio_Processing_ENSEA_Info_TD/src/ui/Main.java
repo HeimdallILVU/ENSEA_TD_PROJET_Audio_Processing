@@ -14,6 +14,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.w3c.dom.Text;
 
@@ -44,7 +45,7 @@ public class Main extends Application {
         }
 
         // TODO - Change HardCoded Format to Interface-defined
-        this.audioFormat = new AudioFormat(16000.0f, 16, 1, true, true);
+        this.audioFormat = new AudioFormat(44000.0f, 16, 1, true, true);
         // TODO - Create the audioProcessor
 
         TargetDataLine audioInput = TargetDataLineFromToolBar(this.toolBar);
@@ -149,10 +150,17 @@ public class Main extends Application {
     private Node createMainContent(){
         SignalView inputSignalView = new SignalView(audioProcessor.getInputSignal(), "Input Signal");
         SignalView outputSignalView = new SignalView(audioProcessor.getOutputSignal(), "Output Signal");
+        VuMeter vuMeter = new VuMeter(50, 200, audioProcessor.getInputSignal());
+        Spectrogram spectrogram = new Spectrogram(400, 200, audioProcessor.getInputSignal(), audioProcessor.getAudioInput().getFormat().getSampleRate());
+        Spectrogram spectrogramZoom = new Spectrogram(400, 200, audioProcessor.getInputSignal(), audioProcessor.getAudioInput().getFormat().getSampleRate());
+        spectrogramZoom.setFrequencyRange(20, 4000);
 
-        HBox hbox = new HBox(inputSignalView, outputSignalView);
 
-        Group g = new Group(hbox);
+        HBox hbox1 = new HBox(inputSignalView, outputSignalView, vuMeter);
+        HBox hbox2 = new HBox(spectrogram, spectrogramZoom);
+        VBox vBox = new VBox(hbox1, hbox2);
+
+        Group g = new Group(vBox);
         return g;
     }
 
