@@ -2,8 +2,8 @@ package audio;
 
 import javax.sound.sampled.*;
 
-/** The main audio processing class, implemented as a Runnable so
-    * as to be run in a separated execution Thread. */
+/** The main audio processing class, implemented as a Runnable
+ * to be run in a separated execution Thread. */
 public class AudioProcessor implements Runnable {
     private AudioSignal inputSignal, outputSignal;
     private TargetDataLine audioInput;

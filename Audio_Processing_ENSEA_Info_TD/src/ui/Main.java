@@ -2,12 +2,10 @@ package ui;
 
 import audio.AudioIO;
 import audio.AudioProcessor;
-import audio.AudioSignal;
 import javafx.application.Application;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.chart.LineChart;
 import javafx.scene.control.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -16,13 +14,8 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import org.w3c.dom.Text;
-
 import javax.sound.sampled.*;
-import javax.tools.Tool;
-import java.awt.*;
-import java.util.ArrayList;
-import java.util.Arrays;
+
 
 public class Main extends Application {
     private AudioProcessor audioProcessor;
@@ -31,6 +24,10 @@ public class Main extends Application {
     private Node statusBar;
     private Node mainContent;
     private BorderPane root;
+
+    /**
+     * Start function of the application
+     */
     @Override
     public void start(Stage primaryStage) {
 
@@ -46,7 +43,6 @@ public class Main extends Application {
 
         // TODO - Change HardCoded Format to Interface-defined
         this.audioFormat = new AudioFormat(44000.0f, 16, 1, true, true);
-        // TODO - Create the audioProcessor
 
         TargetDataLine audioInput = TargetDataLineFromToolBar(this.toolBar);
         SourceDataLine audioOutput = SourceDataLineFromToolBar(this.toolBar);
@@ -71,13 +67,11 @@ public class Main extends Application {
         } catch(Exception e) {
             e.printStackTrace();
         }
-
-
-
-
-
     }
 
+    /**
+     * Update the audioProcessor using the parameter inputted by the user in the toolbar
+     */
     private void updateProcessor() {
         TargetDataLine audioInput = TargetDataLineFromToolBar(this.toolBar);
         SourceDataLine audioOutput = SourceDataLineFromToolBar(this.toolBar);
@@ -88,10 +82,13 @@ public class Main extends Application {
         this.audioProcessor.setFrameSize(FrameSize);
     }
 
+    /**
+     * Create the toolbar that will later on be display at the top of the window
+     */
     private ToolBar createToolbar(){
 
+        // Create the start / stop button
         Button button = new Button("Start");
-
         button.setOnAction(event -> {
             if(button.getText() == "Start") {
                 updateProcessor();
@@ -118,7 +115,7 @@ public class Main extends Application {
             }
         });
 
-        ToolBar tb = new ToolBar(button); //, new Label("ceci est un label"), new Separator()
+        ToolBar tb = new ToolBar(button);
 
         ComboBox<String> cbInputs = new ComboBox<>();
         ComboBox<String> cbOutputs = new ComboBox<>();
@@ -128,25 +125,35 @@ public class Main extends Application {
         Label Output = new Label("Output Device : ");
         Label FrameSize = new Label("FrameSize : ");
 
+        // Adding our Label, ComboBox, Separator to the toolbar for each variable the user can change
         tb.getItems().addAll(new Separator(), Input, cbInputs);
         tb.getItems().addAll(new Separator(), Output, cbOutputs);
         tb.getItems().addAll(new Separator(), FrameSize, frameSizeTextField);
 
+        // Gets all the mixer that are able to Capture or Play Audio
         AudioIO.getAudioMixers().stream().filter(e -> e.getDescription().contains("Capture")).forEach(e -> cbInputs.getItems().add(e.getName()));
         AudioIO.getAudioMixers().stream().filter(e -> e.getDescription().contains("Playback")).forEach(e -> cbOutputs.getItems().add(e.getName()));
 
+        // Automatically define the firsts mixers in the lists as the used mixers
         cbInputs.setValue(cbInputs.getItems().stream().findFirst().orElse(null));
         cbOutputs.setValue(cbOutputs.getItems().stream().findFirst().orElse(null));
 
         return tb;
     }
 
+    // Vestige
+    /**
+     * Create the statusbar that is later on displayed at the bottom of the window
+     */
     private Node createStatusbar(){
         HBox statusbar = new HBox();
         statusbar.getChildren().addAll(new Label("Name:"), new TextField(" Input your desire !"));
         return statusbar;
     }
 
+    /**
+     * Create the main content that is later on displayed in the middle of the window
+     */
     private Node createMainContent(){
         SignalView inputSignalView = new SignalView(audioProcessor.getInputSignal(), "Input Signal");
         SignalView outputSignalView = new SignalView(audioProcessor.getOutputSignal(), "Output Signal");
@@ -156,9 +163,9 @@ public class Main extends Application {
         spectrogramZoom.setFrequencyRange(20, 4000);
 
 
-        HBox hbox1 = new HBox(inputSignalView, outputSignalView, vuMeter);
-        HBox hbox2 = new HBox(spectrogram, spectrogramZoom);
-        VBox vBox = new VBox(hbox1, hbox2);
+        HBox hbox1 = new HBox(inputSignalView, outputSignalView, vuMeter); // First line of widget
+        HBox hbox2 = new HBox(spectrogram, spectrogramZoom); // Second line
+        VBox vBox = new VBox(hbox1, hbox2); // Organizing both line in a vertical Box
 
         Group g = new Group(vBox);
         return g;
