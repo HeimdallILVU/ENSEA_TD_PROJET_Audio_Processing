@@ -122,9 +122,6 @@ public class AudioSignal {
         return true;
     }
 
-    // TODO Can be implemented much later: Complex[] computeFFT()
-
-
     public double getSample(int i) {
         return sampleBuffer[i];
     }

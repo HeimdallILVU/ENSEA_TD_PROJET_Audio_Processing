@@ -24,8 +24,8 @@ public class VuMeter extends Canvas {
 
         this.audioSignal = audioSignal;
 
-        this.factor = 0.9;
-        this.signalLevel = 0.5; // Default signal level
+        this.factor = 0.9; // Factor that is used to attenuate the dBLevel when displayed
+        this.signalLevel = 0.0; // Default signal level
 
 
 
@@ -41,11 +41,9 @@ public class VuMeter extends Canvas {
     public void update() {
         GraphicsContext gc = getGraphicsContext2D();
 
-
+        // Get the dBLevel and calculate the height of the display bar
         this.signalLevel = Math.max(0, Math.min(1, Math.abs((this.audioSignal.getdBlevel() + 45) / 40)  * factor));
         double rectHeight = signalLevel * maxHeight;
-        System.out.println(this.audioSignal.getdBlevel() + " : " + this.signalLevel);
-
 
         // Clear the canvas
         gc.clearRect(0, 0, getWidth(), getHeight());
